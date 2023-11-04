@@ -123,29 +123,35 @@ while true; do
             echo "Enter 'user id' to get movies rated by the user:"
             read user_id
 
-            # Get all movie IDs rated by the user and sort them
-            rated_movie_ids=$(awk -v user_id="$user_id" '$1 == user_id {print $2}' u.data | sort -n)
+            echo "Do you want to proceed and get movies rated by user $user_id? (y/n)"
+            read confirm
+            if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
+                # Get all movie IDs rated by the user and sort them
+                rated_movie_ids=$(awk -v user_id="$user_id" '$1 == user_id {print $2}' u.data | sort -n)
 
-            if [ -n "$rated_movie_ids" ]; then
-                # Print all movie IDs rated by the user without newline
-                echo -n "Movie IDs rated by user $user_id: "
-                echo "$rated_movie_ids" | tr '\n' ' '
+                if [ -n "$rated_movie_ids" ]; then
+                    # Print all movie IDs rated by the user without newline
+                    echo -n "Movie IDs rated by user $user_id: "
+                    echo "$rated_movie_ids" | tr '\n' ' '
 
-                # Print a newline
-                echo
+                    # Print a newline
+                    echo
 
-                # Get top 10 movie IDs rated by the user and store them in a temporary variable
-                top_rated_ids=$(echo "$rated_movie_ids" | head -n 10)
+                    # Get top 10 movie IDs rated by the user and store them in a temporary variable
+                    top_rated_ids=$(echo "$rated_movie_ids" | head -n 10)
 
-                # Get movie titles for the top 10 movie IDs from u.item and print them
-                echo "Top 10 rated movies by user $user_id (Movie ID, Title):"
-                while IFS='|' read -r movie_id movie_title rest; do
-                    if echo "$top_rated_ids" | grep -qw "$movie_id"; then
-                        echo "$movie_id $movie_title"
-                    fi
-                done < <(sort -n -t '|' -k1,1 u.item)
+                    # Get movie titles for the top 10 movie IDs from u.item and print them
+                    echo "Top 10 rated movies by user $user_id (Movie ID, Title):"
+                    while IFS='|' read -r movie_id movie_title rest; do
+                        if echo "$top_rated_ids" | grep -qw "$movie_id"; then
+                            echo "$movie_id $movie_title"
+                        fi
+                    done < <(sort -n -t '|' -k1,1 u.item)
+                else
+                    echo "No movies rated by user $user_id."
+                fi
             else
-                echo "No movies rated by user $user_id."
+                echo "Operation canceled. No movies retrieved."
             fi
             ;;
 
